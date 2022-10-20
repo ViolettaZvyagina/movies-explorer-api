@@ -42,14 +42,14 @@ module.exports.validateDeleteMovie = celebrate({
 module.exports.validateLogin = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(6),
+    password: Joi.string().required(),
   }),
 });
 
 module.exports.validateCreateUser = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().required().min(6),
+    password: Joi.string().required(),
     name: Joi.string().required().min(2).max(30),
   }),
 });

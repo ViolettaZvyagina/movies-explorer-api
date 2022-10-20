@@ -37,9 +37,11 @@ module.exports.createUser = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       next(new ValidateError('Переданы некорректные данные при создании пользователя'));
+      return false;
     }
     if (err.code === 11000) {
       next(new ConflictError('Пользователь с таким email уже существует'));
+      return false;
     }
     return next(err);
   }
@@ -60,9 +62,15 @@ module.exports.updateProfile = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'CastError') {
       next(new ValidateError('Передан некорректный _id пользователя'));
+      return false;
     }
     if (err.name === 'ValidationError') {
       next(new ValidateError('Переданы некорректные данные при создании пользователя'));
+      return false;
+    }
+    if (err.code === 11000) {
+      next(new ConflictError('Пользователь с таким email уже существует'));
+      return false;
     }
     return next(err);
   }
@@ -70,6 +78,11 @@ module.exports.updateProfile = async (req, res, next) => {
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
+
+  if (!email || !password) {
+    next(new UnauthorizedError('Необходимо заполнить поля email и пароль'));
+    return false;
+  }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -82,19 +95,12 @@ module.exports.login = (req, res, next) => {
       });
       res.send({ message: 'Пользователь успешно авторизован' });
     })
-    .catch(() => {
-      throw new UnauthorizedError('Необходимо заполнить поля email и пароль');
-    })
     .catch(next);
 };
 
 module.exports.logout = async (req, res, next) => {
   try {
-    if (!req.cookies) {
-      next(new UnauthorizedError('Пользователь не авторизован'));
-      return;
-    }
-    res.clearCookie('jwt').send({ message: 'token удалён' }).end();
+    res.clearCookie('jwt').send({ message: 'token удалён' });
   } catch (err) {
     next(err);
   }

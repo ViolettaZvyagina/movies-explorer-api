@@ -1,36 +1,35 @@
-const userRouter = require('express').Router();
-const movieRouter = require('express').Router();
-const { validateUpdateProfile, validateCreateMovie, validateDeleteMovie } = require('../middlewares/validation');
+const router = require('express').Router();
+const { userRouter } = require('./users');
+const { movieRouter } = require('./movies');
+const { validateLogin, validateCreateUser } = require('../middlewares/validation');
+const { createUser, login, logout } = require('../controllers/users');
+const NotFoundError = require('../errors/notFoundError');
+const { auth } = require('../middlewares/auth');
+const { errorLogger } = require('../middlewares/logger');
 
-const {
-  updateProfile,
-  getUser,
-} = require('../controllers/users');
-
-const {
-  getMovies,
-  createMovie,
-  deleteMovie,
-} = require('../controllers/movies');
-
-userRouter.get('/me', getUser);
-userRouter.patch(
-  '/me',
-  validateUpdateProfile,
-  updateProfile,
+router.post(
+  '/signin',
+  validateLogin,
+  login,
+);
+router.post(
+  '/signup',
+  validateCreateUser,
+  createUser,
 );
 
-movieRouter.get('/', getMovies);
-movieRouter.post(
-  '/',
-  validateCreateMovie,
-  createMovie,
-);
+router.use(auth);
 
-movieRouter.delete(
-  '/:id',
-  validateDeleteMovie,
-  deleteMovie,
-);
+router.post('/signout', logout);
 
-module.exports = { userRouter, movieRouter };
+router.use('/users', userRouter);
+
+router.use('/movies', movieRouter);
+
+router.use(errorLogger);
+
+router.use('*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
+});
+
+module.exports = router;
