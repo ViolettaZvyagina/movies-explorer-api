@@ -7,7 +7,7 @@ const helmet = require('helmet');
 const { errors } = require('celebrate');
 const limiter = require('./utils/rateLimiter');
 const mongoUrl = require('./utils/mongoUrl');
-const { requestLogger } = require('./middlewares/logger');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 const cors = require('./middlewares/cors');
 const errorHandler = require('./errors/errorHandler');
 
@@ -24,7 +24,7 @@ app.use(cors);
 app.use(requestLogger);
 app.use(limiter);
 
-app.use('/', require('./routes/index'));
+app.use('/', require('./routes'));
 
 app.get('/crash-test', () => {
   setTimeout(() => {
@@ -40,6 +40,7 @@ async function main() {
     useUnifiedTopology: false,
   });
 
+  app.use(errorLogger);
   app.use(errors());
 
   app.use(errorHandler);

@@ -79,11 +79,6 @@ module.exports.updateProfile = async (req, res, next) => {
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  if (!email || !password) {
-    next(new UnauthorizedError('Необходимо заполнить поля email и пароль'));
-    return false;
-  }
-
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret');
@@ -94,6 +89,9 @@ module.exports.login = (req, res, next) => {
         sameSite: true,
       });
       res.send({ message: 'Пользователь успешно авторизован' });
+    })
+    .catch(() => {
+      throw new UnauthorizedError('Необходимо заполнить поля email и пароль');
     })
     .catch(next);
 };
