@@ -11,7 +11,7 @@ const { requestLogger, errorLogger } = require('./middlewares/logger');
 const cors = require('./middlewares/cors');
 const errorHandler = require('./errors/errorHandler');
 
-const { PORT = 3000, NODE_ENV, MONGO_DB } = process.env;
+const { PORT = 4000, NODE_ENV, MONGO_DB } = process.env;
 
 const app = express();
 
