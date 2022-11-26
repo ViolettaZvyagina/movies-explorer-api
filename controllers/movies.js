@@ -25,50 +25,11 @@ module.exports.createMovie = async (req, res, next) => {
   }
 };
 
-/* module.exports.deleteMovie = async (req, res, next) => {
-  try {
-    const owner = req.user._id;
-    const movie = await Movie.findById(req.params.id);
-    if (!movie) {
-      throw new NotFoundError('Фильм по указанному id не найден');
-    }
-    if (movie.owner.toString() !== owner) {
-      throw new ForbiddenError('Нет прав на удаление фильма');
-    }
-    await Movie.findByIdAndRemove(req.params.id);
-    return res.status(200).send(movie);
-  } catch (err) {
-    if (err.name === 'CastError') {
-      next(new ValidateError('Передан некорректный id фильма'));
-      return false;
-    }
-    return next(err);
-  }
-};
-
-/* module.exports.deleteMovie = (req, res, next) => {
-  const { movieId } = req.params;
-  const owner = req.user._id;
-  Movie.findOne(movieId)
-    .orFail(new NotFoundError('Фильм по указанному id не найден'))
-    .then((movie) => {
-      if (movie.owner.toString() === owner) {
-        Movie.findOneAndRemove(movieId)
-          .then(() => res.status(200).send(movie))
-          .catch(next);
-      } else {
-        throw new ForbiddenError('Нет прав на удаление фильма');
-      }
-    })
-    .catch(next);
-}; */
-
 module.exports.deleteMovie = async (req, res, next) => {
   try {
     const { movieId } = req.params;
     const owner = req.user._id;
     const movie = await Movie.findOne({ movieId, owner });
-    console.log(movie);
     if (!movie) {
       throw new NotFoundError('Фильм по указанному id не найден');
     }
